@@ -12,6 +12,7 @@ require_once __DIR__ . "/Controllers/EventMediaController.php";
 require_once __DIR__ . "/Controllers/SeatMapController.php";
 require_once __DIR__ . "/Controllers/SeatsController.php";
 require_once __DIR__ . "/Controllers/ListingsController.php";
+require_once __DIR__ . "/Controllers/OrdersController.php";
 
 /**
  * Controllers (create these files later; for now we use inline handlers).
@@ -115,18 +116,21 @@ $router->add("POST", "/api/events/:id/tickets/mint/confirm",  fn($p) => Response
 
 $listings = new ListingsController();
 /* Listings */
+
 $router->add("POST", "/api/listings", [$listings, "create"]);
 $router->add("GET",  "/api/listings", [$listings, "index"]);
 $router->add("GET",  "/api/listings/:id", [$listings, "show"]);
-$router->add("POST", "/api/listings/:id/cancel", [$listings, "cancel"]);
+$router->add("POST", "/api/listings/:id/cancel", [$listings, "cancel"]); 
 
+$orders = new OrdersController();
 /* Orders (buy flow) */
-$router->add("POST", "/api/orders", fn() => Response::json(["todo" => "orders/create"]));
-$router->add("GET",  "/api/orders/:id",fn($p) => Response::json(["todo" => "orders/show", "params" => $p]));
+
+$router->add("POST", "/api/orders", [$orders, "create"]);
+$router->add("GET",  "/api/orders/:id", [$orders, "show"]);
+$router->add("POST", "/api/orders/:id/cancel", [$orders, "cancel"]);
 
 $router->add("POST", "/api/orders/:id/checkout/unsigned",fn($p) => Response::json(["todo" => "orders/checkout_unsigned", "params" => $p]));
 $router->add("POST", "/api/orders/:id/confirm", fn($p) => Response::json(["todo" => "orders/confirm", "params" => $p]));
-$router->add("POST", "/api/orders/:id/cancel", fn($p) => Response::json(["todo" => "orders/cancel", "params" => $p]));
 
 /*Gate (check-in)*/
 $router->add("GET",  "/api/gate/events/today", fn() => Response::json(["todo" => "gate/events_today"]));
