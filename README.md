@@ -115,10 +115,134 @@ README.md
 
 ## Local Development
 
-Requirements:
+### Requirements:
 
 - XAMPP
 - PHP 8.2+
 - MySQL / MariaDB
-- Local path
+
+### Local path
+
+```text
+C:\xampp\htdocs\sports-tickets-backend
+```
+
+### Base URL
+
+```text
+http://localhost/sports-tickets-backend/public
+```
+
+### Start locally
+1. Start Apache in XAMPP
+2. Start MySQL in XAMPP
+3. Open:
+
+```text
+http://localhost/sports-tickets-backend/public/api/health
+```
+
+### Test database connection
+```text
+http://localhost/sports-tickets-backend/public/api/db/ping
+```
+
+---
+
+## API Routes
+
+### Health
+- GET /api/health
+- GET /api/db/ping
+
+### Events
+- POST /api/events
+- GET /api/events
+- GET /api/events/:id
+- PATCH /api/events/:id
+- POST /api/events/:id/publish
+
+### Event Media
+- POST /api/events/:id/media
+- GET /api/events/:id/media
+- DELETE /api/events/:id/media/:mediaId
+
+### Seat Maps
+- PUT /api/events/:id/seatmap
+- GET /api/events/:id/seatmap
+
+### Seats
+- POST /api/events/:id/seats/bulk
+- GET /api/events/:id/seats
+- PATCH /api/seats/:seatId
+
+### Listings
+- POST /api/listings
+- GET /api/listings
+- GET /api/listings/:id
+- POST /api/listings/:id/cancel
+
+### Orders
+- POST /api/orders
+- GET /api/orders/:id
+- POST /api/orders/:id/cancel
+
+---
+
+## Current Business Flow
+The backend currently supports this marketplace flow:
+
+1. Create an event
+2. Upload event media
+3. Add seat map JSON
+4. Bulk insert seats
+5. Create ticket listings
+6. Create and cancel orders
+
+---
+## Database Notes
+
+This backend uses a relational structure for:
+- users
+- venues
+- events
+- event_media
+- seat_maps
+- seats
+- tickets
+- listings
+- orders
+- chain_txs
+- revenue_splits
+
+Important notes:
+- seat_maps.event_id should be unique
+- uploaded files are stored on disk and referenced by URL in event_media
+- listings depend on tickets
+- seat creation is designed to happen in bulk
+
+---
+
+## Uploads
+Uploaded files are stored in:
+
+```text
+public/uploads/events/{eventId}/
+```
+
+Supported mime types:
+
+- image/jpeg
+- image/png
+- image/webp
+
+---
+
+## Git Notes
+
+Do not commit:
+- .env
+- uploaded files
+- local logs
+- secrets
 
