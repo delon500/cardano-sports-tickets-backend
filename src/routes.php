@@ -128,9 +128,9 @@ $orders = new OrdersController();
 $router->add("POST", "/api/orders", [$orders, "create"]);
 $router->add("GET",  "/api/orders/:id", [$orders, "show"]);
 $router->add("POST", "/api/orders/:id/cancel", [$orders, "cancel"]);
+$router->add("POST", "/api/orders/:id/confirm", [$orders, "confirm"]);
 
 $router->add("POST", "/api/orders/:id/checkout/unsigned",fn($p) => Response::json(["todo" => "orders/checkout_unsigned", "params" => $p]));
-$router->add("POST", "/api/orders/:id/confirm", fn($p) => Response::json(["todo" => "orders/confirm", "params" => $p]));
 
 /*Gate (check-in)*/
 $router->add("GET",  "/api/gate/events/today", fn() => Response::json(["todo" => "gate/events_today"]));

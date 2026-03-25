@@ -190,6 +190,74 @@ final class OrdersController
             Errors::server("Failed to cancel order", ["db" => $e->getMessage()]);
         }
     }
+
+    /**
+     * POST /api/orders/:id/confirm
+     *
+     * Confirms a PENDING_ONCHAIN order.
+     * Keeps the listing SOLD and transfers ticket ownership to buyer_user_id.
+     */
+    public function confirm(array $p): void
+    {
+        $pdo = DB::conn();
+        $id = $this->parseId($p, "id");
+        if ($id === null) return;
+
+        $order = $this->findOrderById($pdo, $id);
+        if (!$order) {
+            Errors::notFound("Order not found");
+            return;
+        }
+
+        if (($order["status"] ?? null) !== "PENDING_ONCHAIN") {
+            Errors::validation(["status" => "Only PENDING_ONCHAIN orders can be confirmed"]);
+            return;
+        }
+
+        $buyerUserId = $order["buyer_user_id"] !== null ? (int)$order["buyer_user_id"] : null;
+        if ($buyerUserId === null) {
+            Errors::validation(["buyer_user_id" => "Order buyer_user_id is required for confirmation"]);
+            return;
+        }
+
+        $listingId = (int)$order["listing_id"];
+        $ticketId = (int)$order["ticket_id"];
+
+        $pdo->beginTransaction();
+        try {
+            $stmt = $pdo->prepare("
+                UPDATE orders
+                SET status = 'CONFIRMED'
+                WHERE id = ?
+            ");
+            $stmt->execute([$id]);
+
+            $stmt = $pdo->prepare("
+                UPDATE listings
+                SET status = 'SOLD'
+                WHERE id = ?
+            ");
+            $stmt->execute([$listingId]);
+
+            $stmt = $pdo->prepare("
+                UPDATE tickets
+                SET owner_user_id = ?
+                WHERE id = ?
+            ");
+            $stmt->execute([$buyerUserId, $ticketId]);
+
+            $pdo->commit();
+
+            Response::json([
+                "ok" => true,
+                "order" => $this->findOrderById($pdo, $id)
+            ]);
+        } catch (PDOException $e) {
+            $pdo->rollBack();
+            Errors::server("Failed to confirm order", ["db" => $e->getMessage()]);
+        }
+    }
+
     private function findListingById(PDO $pdo, int $id): ?array 
     {
         $stmt = $pdo->prepare("

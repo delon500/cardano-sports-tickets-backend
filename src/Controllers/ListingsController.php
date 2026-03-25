@@ -236,7 +236,7 @@ final class ListingsController
             "ok" => true,
             "limit" => $limit,
             "offset" => $offset,
-            "listing" => $stmt->fetchAll()
+            "listings" => $stmt->fetchAll()
         ]);
     }
 
